@@ -1,5 +1,5 @@
 export type UserRole = "employee" | "admin";
-export type EmployeeStatus = "active" | "inactive";
+export type EmployeeStatus = "active" | "inactive" | "pending";
 export type PaymentMethod = "wave" | "orange_money";
 export type AdvanceStatus = "pending" | "approved" | "rejected" | "paid" | "failed";
 export type PaymentStatus = "pending" | "success" | "failed";
@@ -18,11 +18,18 @@ export interface Employee {
   email: string;
   phone: string;
   department: string | null;
+  company_id: string | null;
   monthly_salary: string;
   hire_date: string;
   status: EmployeeStatus;
   created_at: string;
   updated_at: string;
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  created_at: string;
 }
 
 export interface AppUser {
@@ -32,6 +39,7 @@ export interface AppUser {
   role: UserRole;
   employee_id: string | null;
   is_active: boolean;
+  deleted_at: string | null;
 }
 
 export interface PayrollSettings {
@@ -63,6 +71,19 @@ export interface AdvanceRequest {
   reviewed_by: string | null;
   reviewed_at: string | null;
   created_at: string;
+}
+
+export interface CurrentUserProfile {
+  id: string;
+  email: string;
+  role: UserRole;
+  employeeId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  employeeCode: string | null;
+  employeeStatus: EmployeeStatus | null;
+  companyName: string | null;
 }
 
 declare global {

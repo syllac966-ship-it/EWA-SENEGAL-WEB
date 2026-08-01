@@ -19,6 +19,23 @@ async function seed() {
       );
     }
 
+    // Entreprises partenaires (liste blanche utilisée à l'inscription en libre-service)
+    const partnerCompanies = ["EWA Senegal Demo SARL", "Teranga Tech", "Dakar Logistics"];
+    const companyIds: Record<string, string> = {};
+    for (const name of partnerCompanies) {
+      const existing = await client.query<{ id: string }>(`SELECT id FROM companies WHERE name = $1`, [name]);
+      if (existing.rowCount && existing.rowCount > 0) {
+        companyIds[name] = existing.rows[0]!.id;
+      } else {
+        const inserted = await client.query<{ id: string }>(
+          `INSERT INTO companies (name) VALUES ($1) RETURNING id`,
+          [name]
+        );
+        companyIds[name] = inserted.rows[0]!.id;
+        console.log(`Entreprise partenaire créée: ${name}`);
+      }
+    }
+
     // Compte admin RH
     const adminEmail = "admin@ewa-senegal.sn";
     const adminPasswordHash = await hashPassword("Admin@2024!");
@@ -35,12 +52,14 @@ async function seed() {
     const employeeEmail = "aissatou.diop@ewa-senegal.sn";
     const existingEmployee = await client.query(`SELECT id FROM employees WHERE email = $1`, [employeeEmail]);
 
+    const demoCompanyId = companyIds["EWA Senegal Demo SARL"]!;
+
     let employeeId: string;
     if (existingEmployee.rowCount === 0) {
       const inserted = await client.query<{ id: string }>(
         `INSERT INTO employees
-           (employee_code, first_name, last_name, email, phone, department, monthly_salary, hire_date, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'active')
+           (employee_code, first_name, last_name, email, phone, department, company_id, monthly_salary, hire_date, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'active')
          RETURNING id`,
         [
           "EMP-0001",
@@ -49,6 +68,7 @@ async function seed() {
           employeeEmail,
           "+221771234567",
           "Opérations",
+          demoCompanyId,
           350000,
           "2024-01-15",
         ]
@@ -57,6 +77,10 @@ async function seed() {
       console.log(`Employé créé: ${employeeEmail}`);
     } else {
       employeeId = existingEmployee.rows[0]!.id;
+      await client.query(`UPDATE employees SET company_id = $1 WHERE id = $2 AND company_id IS NULL`, [
+        demoCompanyId,
+        employeeId,
+      ]);
     }
 
     const employeePasswordHash = await hashPassword("Salarie@2024!");

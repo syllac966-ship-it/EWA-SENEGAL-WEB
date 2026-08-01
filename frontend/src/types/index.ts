@@ -1,5 +1,5 @@
 export type UserRole = "employee" | "admin";
-export type EmployeeStatus = "active" | "inactive";
+export type EmployeeStatus = "active" | "inactive" | "pending";
 export type PaymentMethod = "wave" | "orange_money";
 export type AdvanceStatus = "pending" | "approved" | "rejected" | "paid" | "failed";
 
@@ -10,6 +10,19 @@ export interface AuthUser {
   employeeId: string | null;
 }
 
+export interface CurrentUserProfile {
+  id: string;
+  email: string;
+  role: UserRole;
+  employeeId: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  phone: string | null;
+  employeeCode: string | null;
+  employeeStatus: EmployeeStatus | null;
+  companyName: string | null;
+}
+
 export interface Employee {
   id: string;
   employee_code: string;
@@ -18,6 +31,7 @@ export interface Employee {
   email: string;
   phone: string;
   department: string | null;
+  company_id: string | null;
   monthly_salary: string;
   hire_date: string;
   status: EmployeeStatus;

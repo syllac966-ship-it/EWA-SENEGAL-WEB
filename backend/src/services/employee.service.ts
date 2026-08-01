@@ -4,7 +4,7 @@ import { hashPassword } from "../utils/password";
 import type { CreateEmployeeInput, UpdateEmployeeInput } from "../validators/employee.validator";
 import type { Employee } from "../types";
 
-async function generateEmployeeCode(client: import("pg").PoolClient): Promise<string> {
+export async function generateEmployeeCode(client: import("pg").PoolClient): Promise<string> {
   const result = await client.query<{ count: string }>(`SELECT COUNT(*) AS count FROM employees`);
   const next = Number(result.rows[0]!.count) + 1;
   return `EMP-${String(next).padStart(4, "0")}`;
@@ -67,8 +67,8 @@ export async function updateEmployee(id: string, updates: UpdateEmployeeInput): 
   const result = await query<Employee>(
     `UPDATE employees
      SET first_name = $1, last_name = $2, phone = $3, department = $4,
-         monthly_salary = $5, status = $6, updated_at = now()
-     WHERE id = $7
+         monthly_salary = $5, hire_date = $6, status = $7, updated_at = now()
+     WHERE id = $8
      RETURNING *`,
     [
       updates.firstName ?? current.first_name,
@@ -76,9 +76,23 @@ export async function updateEmployee(id: string, updates: UpdateEmployeeInput): 
       updates.phone ?? current.phone,
       updates.department ?? current.department,
       updates.monthlySalary ?? current.monthly_salary,
+      updates.hireDate ?? current.hire_date,
       updates.status ?? current.status,
       id,
     ]
+  );
+  return result.rows[0]!;
+}
+
+/**
+ * Mise à jour de profil en libre-service : un salarié ne peut modifier que
+ * son propre numéro de téléphone (jamais son salaire, statut, etc.).
+ */
+export async function updateOwnPhone(employeeId: string, phone: string): Promise<Employee> {
+  await getEmployeeById(employeeId);
+  const result = await query<Employee>(
+    `UPDATE employees SET phone = $1, updated_at = now() WHERE id = $2 RETURNING *`,
+    [phone, employeeId]
   );
   return result.rows[0]!;
 }

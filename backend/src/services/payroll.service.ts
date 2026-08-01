@@ -1,6 +1,6 @@
 import { query } from "../config/db";
-import { NotFoundError } from "../utils/AppError";
-import type { PayrollSettings } from "../types";
+import { ForbiddenError, NotFoundError } from "../utils/AppError";
+import type { EmployeeStatus, PayrollSettings } from "../types";
 
 export interface PayPeriod {
   start: Date;
@@ -97,13 +97,21 @@ export async function computeEarnedSalary(employeeId: string): Promise<EarnedSal
   const settings = await getPayrollSettings();
   const { start, end } = getCurrentPayPeriod(settings.pay_period_start_day);
 
-  const employeeResult = await query<{ monthly_salary: string }>(
-    `SELECT monthly_salary FROM employees WHERE id = $1`,
+  const employeeResult = await query<{ monthly_salary: string; status: EmployeeStatus }>(
+    `SELECT monthly_salary, status FROM employees WHERE id = $1`,
     [employeeId]
   );
   const employee = employeeResult.rows[0];
   if (!employee) {
     throw new NotFoundError("Employé introuvable");
+  }
+  if (employee.status === "pending") {
+    throw new ForbiddenError(
+      "Votre compte est en attente de validation par les ressources humaines de votre entreprise."
+    );
+  }
+  if (employee.status === "inactive") {
+    throw new ForbiddenError("Votre compte a été désactivé. Contactez votre service RH.");
   }
 
   const workedDaysResult = await query<{ count: string }>(

@@ -9,8 +9,12 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE employee_status AS ENUM ('active', 'inactive');
+  CREATE TYPE employee_status AS ENUM ('active', 'inactive', 'pending');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Migration douce : bases créées avant l'introduction du statut "pending"
+-- (inscription en libre-service, en attente de validation RH).
+ALTER TYPE employee_status ADD VALUE IF NOT EXISTS 'pending';
 
 DO $$ BEGIN
   CREATE TYPE payment_method AS ENUM ('wave', 'orange_money');
@@ -24,6 +28,13 @@ DO $$ BEGIN
   CREATE TYPE payment_status AS ENUM ('pending', 'success', 'failed');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Entreprises partenaires (habilitées à faire bénéficier leurs salariés d'EWA)
+CREATE TABLE IF NOT EXISTS companies (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(150) NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- Employés
 CREATE TABLE IF NOT EXISTS employees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -33,12 +44,25 @@ CREATE TABLE IF NOT EXISTS employees (
   email VARCHAR(255) NOT NULL UNIQUE,
   phone VARCHAR(20) NOT NULL,
   department VARCHAR(100),
-  monthly_salary NUMERIC(12, 2) NOT NULL CHECK (monthly_salary > 0),
+  company_id UUID REFERENCES companies(id),
+  monthly_salary NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (monthly_salary >= 0),
   hire_date DATE NOT NULL,
   status employee_status NOT NULL DEFAULT 'active',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Migration douce : bases créées avant les entreprises partenaires / l'inscription en libre-service
+ALTER TABLE employees ADD COLUMN IF NOT EXISTS company_id UUID REFERENCES companies(id);
+DO $$ BEGIN
+  ALTER TABLE employees ALTER COLUMN monthly_salary SET DEFAULT 0;
+EXCEPTION WHEN undefined_column THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE employees DROP CONSTRAINT employees_monthly_salary_check;
+EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN
+  ALTER TABLE employees ADD CONSTRAINT employees_monthly_salary_check CHECK (monthly_salary >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Comptes d'authentification (salarié ou admin RH)
 CREATE TABLE IF NOT EXISTS users (
@@ -48,6 +72,7 @@ CREATE TABLE IF NOT EXISTS users (
   role user_role NOT NULL,
   employee_id UUID REFERENCES employees(id) ON DELETE CASCADE,
   is_active BOOLEAN NOT NULL DEFAULT true,
+  deleted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   CONSTRAINT employee_role_has_employee CHECK (
@@ -56,7 +81,23 @@ CREATE TABLE IF NOT EXISTS users (
   )
 );
 
+-- Migration douce : bases créées avant la suppression de compte (soft delete)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+
 CREATE INDEX IF NOT EXISTS idx_users_employee_id ON users(employee_id);
+
+-- Jetons de réinitialisation de mot de passe (le jeton brut n'est jamais stocké,
+-- seul son hash SHA-256 l'est — comparable à un mot de passe à usage unique).
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(64) NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user ON password_reset_tokens(user_id);
 
 -- Paramètres de paie (une seule ligne active pour le MVP)
 CREATE TABLE IF NOT EXISTS payroll_settings (
@@ -143,3 +184,16 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 CREATE INDEX IF NOT EXISTS idx_payments_advance_request ON payments(advance_request_id);
+
+-- Messages du formulaire "Nous contacter"
+CREATE TABLE IF NOT EXISTS support_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  name VARCHAR(200) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  subject VARCHAR(200) NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_messages_user ON support_messages(user_id);

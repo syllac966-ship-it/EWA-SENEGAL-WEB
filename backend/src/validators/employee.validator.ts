@@ -21,7 +21,8 @@ export const updateEmployeeSchema = z.object({
   phone: z.string().trim().regex(phoneRegex).optional(),
   department: z.string().trim().max(100).optional(),
   monthlySalary: z.coerce.number().positive().optional(),
-  status: z.enum(["active", "inactive"]).optional(),
+  hireDate: z.string().date("Date d'embauche invalide (format attendu: AAAA-MM-JJ)").optional(),
+  status: z.enum(["active", "inactive", "pending"]).optional(),
 });
 
 export const recordAttendanceSchema = z.object({

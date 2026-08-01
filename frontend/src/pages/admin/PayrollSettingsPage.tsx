@@ -1,9 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useTranslation } from "../../i18n/LanguageContext";
 import { api, getApiErrorMessage } from "../../lib/api";
 import { Card } from "../../components/ui/Card";
+import { Field } from "../../components/ui/Field";
+import { Button } from "../../components/ui/Button";
 import type { PayrollSettings } from "../../types";
 
 export function PayrollSettingsPage() {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<PayrollSettings | null>(null);
   const [workingDays, setWorkingDays] = useState("");
   const [capPercent, setCapPercent] = useState("");
@@ -36,7 +40,7 @@ export function PayrollSettingsPage() {
         serviceFeePercent: Number(feePercent),
       });
       setSettings(res.data);
-      setSuccess("Paramètres mis à jour.");
+      setSuccess(t("admin.settings.updated"));
     } catch (err) {
       setError(getApiErrorMessage(err));
     } finally {
@@ -44,86 +48,65 @@ export function PayrollSettingsPage() {
     }
   }
 
-  if (!settings) return <p className="text-sm text-gray-500">Chargement...</p>;
+  if (!settings) return <p className="text-sm text-gray-500 dark:text-gray-400">{t("common.loading")}</p>;
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Paramètres de paie</h1>
-        <p className="text-sm text-gray-500">Ces valeurs s'appliquent à tous les calculs de salaire gagné.</p>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("admin.settings.title")}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("admin.settings.subtitle")}</p>
       </div>
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Jours ouvrés par mois</label>
-            <input
-              type="number"
-              min={1}
-              max={31}
-              required
-              value={workingDays}
-              onChange={(e) => setWorkingDays(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            />
-            <p className="mt-1 text-xs text-gray-400">Utilisé pour calculer le taux journalier (salaire mensuel / jours ouvrés).</p>
-          </div>
+          <Field
+            label={t("admin.settings.workingDays")}
+            type="number"
+            min={1}
+            max={31}
+            required
+            value={workingDays}
+            onChange={setWorkingDays}
+            hint={t("admin.settings.workingDaysHint")}
+          />
+          <Field
+            label={t("admin.settings.capPercent")}
+            type="number"
+            min={1}
+            max={100}
+            step="0.01"
+            required
+            value={capPercent}
+            onChange={setCapPercent}
+            hint={t("admin.settings.capPercentHint")}
+          />
+          <Field
+            label={t("admin.settings.feePercent")}
+            type="number"
+            min={0}
+            max={100}
+            step="0.01"
+            required
+            value={feePercent}
+            onChange={setFeePercent}
+            hint={t("admin.settings.feePercentHint")}
+          />
+          <Field
+            label={t("admin.settings.startDay")}
+            type="number"
+            min={1}
+            max={28}
+            required
+            value={startDay}
+            onChange={setStartDay}
+          />
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Plafond d'avance (%)</label>
-            <input
-              type="number"
-              min={1}
-              max={100}
-              step="0.01"
-              required
-              value={capPercent}
-              onChange={(e) => setCapPercent(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            />
-            <p className="mt-1 text-xs text-gray-400">Part maximale du salaire déjà gagné qu'un employé peut demander en avance.</p>
-          </div>
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+          {success && <p className="text-sm text-primary-700 dark:text-primary-400">{success}</p>}
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Frais de service sur avance (%)</label>
-            <input
-              type="number"
-              min={0}
-              max={100}
-              step="0.01"
-              required
-              value={feePercent}
-              onChange={(e) => setFeePercent(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            />
-            <p className="mt-1 text-xs text-gray-400">
-              Ajouté au montant demandé pour déterminer ce qui sera déduit du salaire en fin de mois.
-            </p>
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Jour de début de la période de paie</label>
-            <input
-              type="number"
-              min={1}
-              max={28}
-              required
-              value={startDay}
-              onChange={(e) => setStartDay(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
-            />
-          </div>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {success && <p className="text-sm text-primary-700">{success}</p>}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50"
-          >
-            {submitting ? "Enregistrement..." : "Enregistrer"}
-          </button>
+          <Button type="submit" disabled={submitting} fullWidth>
+            {submitting ? t("common.saving") : t("common.save")}
+          </Button>
         </form>
       </Card>
     </div>
