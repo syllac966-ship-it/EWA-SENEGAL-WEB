@@ -80,6 +80,8 @@ export const fr = {
   dashboard: {
     title: "Mon salaire",
     period: "Période en cours",
+    availableNowLabel: "Montant disponible aujourd'hui",
+    availableNowHint: "Plafond : {{percent}}% du salaire gagné",
     earnedGauge: "Salaire déjà gagné ce mois",
     advanceGauge: "Disponible à l'avance",
     outOf: "sur {{amount}}",

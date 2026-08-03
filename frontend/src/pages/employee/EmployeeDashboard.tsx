@@ -54,6 +54,14 @@ export function EmployeeDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Prominent available-now block: top of page, must be immediately visible */}
+      <div className="mx-auto w-full max-w-6xl px-4">
+        <div className="rounded-3xl bg-primary-600 text-white p-6 shadow-lg">
+          <p className="text-sm font-semibold opacity-90">{t("dashboard.availableNowLabel")}</p>
+          <p className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">{formatFcfa(summary.availableForAdvance)}</p>
+          <p className="mt-1 text-sm opacity-90">{t("dashboard.availableNowHint", { percent: summary.advanceCapPercent })}</p>
+        </div>
+      </div>
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           {t("dashboard.title")}

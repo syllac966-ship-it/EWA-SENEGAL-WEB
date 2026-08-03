@@ -82,6 +82,8 @@ export const en: Dictionary = {
   dashboard: {
     title: "My salary",
     period: "Current period",
+    availableNowLabel: "Available to withdraw today",
+    availableNowHint: "Cap: {{percent}}% of earned salary",
     earnedGauge: "Salary earned this month",
     advanceGauge: "Available for advance",
     outOf: "of {{amount}}",
