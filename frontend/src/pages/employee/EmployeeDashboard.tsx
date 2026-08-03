@@ -44,7 +44,6 @@ export function EmployeeDashboard() {
 
   if (error) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
   if (!summary) return <p className="text-sm text-gray-500 dark:text-gray-400">{t("common.loading")}</p>;
-
   const earnedPercent = summary.monthlySalary > 0 ? (summary.earnedAmount / summary.monthlySalary) * 100 : 0;
   const advancePercent = summary.capAmount > 0 ? (summary.availableForAdvance / summary.capAmount) * 100 : 0;
   const workedDaysLabel = t("dashboard.daysWorked", {
@@ -52,23 +51,32 @@ export function EmployeeDashboard() {
     total: summary.workingDaysPerMonth,
   });
 
+  function formatMonthYear(isoDate: string) {
+    return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(new Date(isoDate));
+  }
+
   return (
     <div className="space-y-6">
-      {/* Prominent available-now block: top of page, must be immediately visible */}
-      <div className="mx-auto w-full max-w-6xl px-4">
-        <div className="rounded-3xl bg-primary-600 text-white p-6 shadow-lg">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          {t("dashboard.title")} — {t("dashboard.period")} : {formatMonthYear(summary.periodStart)}
+        </h1>
+      </div>
+
+      <div className="mx-auto max-w-4xl">
+        <div className="rounded-3xl bg-primary-600 text-white p-6 shadow-md">
           <p className="text-sm font-semibold opacity-90">{t("dashboard.availableNowLabel")}</p>
           <p className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">{formatFcfa(summary.availableForAdvance)}</p>
           <p className="mt-1 text-sm opacity-90">{t("dashboard.availableNowHint", { percent: summary.advanceCapPercent })}</p>
+          <div className="mt-4">
+            <Link
+              to="/dashboard/advance"
+              className="inline-block rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-600"
+            >
+              {t("dashboard.ctaButton")}
+            </Link>
+          </div>
         </div>
-      </div>
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-          {t("dashboard.title")}
-        </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {t("dashboard.period")} : {formatDate(summary.periodStart)} — {formatDate(summary.periodEnd)}
-        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
