@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "../../i18n/LanguageContext";
 import { api, getApiErrorMessage } from "../../lib/api";
-import { formatDate, formatFcfa } from "../../lib/format";
+import { formatFcfa } from "../../lib/format";
 import { Card } from "../../components/ui/Card";
 import { CircularGauge } from "../../components/ui/CircularGauge";
 import type { EarnedSalarySummary } from "../../types";
