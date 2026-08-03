@@ -10,12 +10,17 @@ export function AdvanceHistory() {
   const { t } = useTranslation();
   const [requests, setRequests] = useState<AdvanceRequest[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [monthlyTotals, setMonthlyTotals] = useState<{ month: string; total: number }[] | null>(null);
 
   useEffect(() => {
     api
       .get<AdvanceRequest[]>("/advances/me")
       .then((res) => setRequests(res.data))
       .catch((err) => setError(getApiErrorMessage(err)));
+    api
+      .get<{ totals: { month: string; total: number }[] }>("/advances/me/monthly-totals?months=12")
+      .then((res) => setMonthlyTotals(res.data.totals))
+      .catch(() => setMonthlyTotals([]));
   }, []);
 
   return (
@@ -29,6 +34,21 @@ export function AdvanceHistory() {
       )}
 
       <div className="space-y-3">
+        <Card className="p-4">
+          <h2 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">{t("advanceHistory.monthlyTotalsTitle")}</h2>
+          {monthlyTotals && monthlyTotals.length > 0 ? (
+            <ul className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
+              {monthlyTotals.map((m) => (
+                <li key={m.month} className="flex justify-between">
+                  <span>{new Date(m.month + "-01").toLocaleString(undefined, { month: "long", year: "numeric" })}</span>
+                  <span className="font-semibold">{formatFcfa(m.total)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("advanceHistory.noMonthlyTotals")}</p>
+          )}
+        </Card>
         {requests?.map((request) => (
           <Card key={request.id} className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">

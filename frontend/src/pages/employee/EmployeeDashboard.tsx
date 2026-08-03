@@ -13,7 +13,7 @@ export function EmployeeDashboard() {
   const { t } = useTranslation();
   const [summary, setSummary] = useState<EarnedSalarySummary | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [monthlyWithdrawn, setMonthlyWithdrawn] = useState<number | null>(null);
+  const [monthlyWithdrawn, setMonthlyWithdrawn] = useState<number>(0);
 
   const isPendingOrInactive = user?.employeeStatus === "pending" || user?.employeeStatus === "inactive";
 
@@ -104,10 +104,7 @@ export function EmployeeDashboard() {
         <StatPill label={t("dashboard.statDailyRate")} value={formatFcfa(summary.dailyRate)} />
         <StatPill label={t("dashboard.statMonthlySalary")} value={formatFcfa(summary.monthlySalary)} />
         <StatPill label={t("dashboard.statFeePercent")} value={`${summary.serviceFeePercent}%`} />
-        <StatPill
-          label={t("dashboard.statMonthlyWithdrawals")}
-          value={monthlyWithdrawn !== null ? formatFcfa(monthlyWithdrawn) : formatFcfa(0)}
-        />
+        <StatPill label={t("dashboard.statMonthlyWithdrawals")} value={formatFcfa(monthlyWithdrawn || 0)} />
       </div>
       
 

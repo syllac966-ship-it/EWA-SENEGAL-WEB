@@ -75,6 +75,38 @@ export async function getTotalWithdrawnThisMonth(employeeId: string): Promise<nu
   return Number(result.rows[0]?.total ?? 0);
 }
 
+export async function getMonthlyWithdrawnTotals(employeeId: string, months = 6) {
+  // Get sums per month for the last `months` months
+  const result = await query<{ month: string; total: string }>(
+    `SELECT date_trunc('month', created_at) AS month, COALESCE(SUM(requested_amount),0)::text AS total
+     FROM advance_requests
+     WHERE employee_id = $1
+       AND status = 'paid'
+       AND created_at >= (date_trunc('month', now()) - ($2::int - 1) * interval '1 month')
+     GROUP BY month
+     ORDER BY month DESC`,
+    [employeeId, months]
+  );
+
+  // Build a map from month ISO (YYYY-MM) to total
+  const map = new Map<string, number>();
+  for (const row of result.rows) {
+    const key = new Date(row.month).toISOString().slice(0,7); // YYYY-MM
+    map.set(key, Number(row.total ?? 0));
+  }
+
+  // Prepare array for the last `months` months
+  const out: { month: string; total: number }[] = [];
+  const now = new Date();
+  for (let i = 0; i < months; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.toISOString().slice(0,7);
+    out.push({ month: key, total: map.get(key) ?? 0 });
+  }
+
+  return out; // ordered from most recent to older
+}
+
 export async function listAllAdvanceRequests(status?: AdvanceStatus) {
   const result = status
     ? await query(

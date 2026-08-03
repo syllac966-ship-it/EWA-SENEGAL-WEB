@@ -126,6 +126,8 @@ export const en: Dictionary = {
   advanceHistory: {
     title: "My request history",
     empty: "No requests yet.",
+    monthlyTotalsTitle: "Monthly withdrawals (last 12 months)",
+    noMonthlyTotals: "No monthly data available.",
     received: "received",
     feeLabel: "Service fee ({{percent}}%)",
     deductedLabel: "Deducted from salary",

@@ -12,6 +12,7 @@ router.use(requireAuth);
 router.post("/", validate(createAdvanceRequestSchema), advanceController.create);
 router.get("/me", advanceController.listMine);
 router.get("/me/total-month", advanceController.totalThisMonth);
+router.get("/me/monthly-totals", advanceController.monthlyTotals);
 
 // Admin RH
 router.get("/", requireRole("admin"), advanceController.listAll);

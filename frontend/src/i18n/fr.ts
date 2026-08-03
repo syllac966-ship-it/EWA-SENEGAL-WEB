@@ -124,6 +124,8 @@ export const fr = {
   advanceHistory: {
     title: "Historique de mes demandes",
     empty: "Aucune demande pour le moment.",
+    monthlyTotalsTitle: "Retraits mensuels (12 derniers mois)",
+    noMonthlyTotals: "Aucune donnée mensuelle disponible.",
     received: "reçu",
     feeLabel: "Frais de service ({{percent}}%)",
     deductedLabel: "Déduit du salaire",
