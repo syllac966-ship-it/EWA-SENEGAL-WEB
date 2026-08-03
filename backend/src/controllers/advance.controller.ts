@@ -33,6 +33,14 @@ export const listAll = asyncHandler(async (req: Request, res: Response) => {
   res.json(requests);
 });
 
+export const totalThisMonth = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user?.employeeId) {
+    throw new ForbiddenError("Réservé aux comptes salarié.");
+  }
+  const total = await advanceService.getTotalWithdrawnThisMonth(req.user.employeeId);
+  res.json({ total });
+});
+
 export const review = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
     throw new UnauthorizedError();

@@ -62,6 +62,19 @@ export async function listAdvanceRequestsForEmployee(employeeId: string): Promis
   return result.rows;
 }
 
+export async function getTotalWithdrawnThisMonth(employeeId: string): Promise<number> {
+  const result = await query<{ total: string }>(
+    `SELECT COALESCE(SUM(requested_amount), 0) AS total
+     FROM advance_requests
+     WHERE employee_id = $1
+       AND status = 'paid'
+       AND created_at >= date_trunc('month', now())
+       AND created_at < (date_trunc('month', now()) + interval '1 month')`,
+    [employeeId]
+  );
+  return Number(result.rows[0]?.total ?? 0);
+}
+
 export async function listAllAdvanceRequests(status?: AdvanceStatus) {
   const result = status
     ? await query(

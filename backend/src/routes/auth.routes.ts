@@ -6,6 +6,7 @@ import { authRateLimiter, sensitiveActionRateLimiter } from "../middleware/rateL
 import {
   changePasswordSchema,
   deleteAccountSchema,
+  verifyPasswordSchema,
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
@@ -33,6 +34,7 @@ router.post(
   validate(changePasswordSchema),
   authController.changePassword
 );
+router.post("/verify-password", requireAuth, validate(verifyPasswordSchema), authController.verifyPassword);
 router.post(
   "/delete-account",
   requireAuth,

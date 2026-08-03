@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "../../i18n/LanguageContext";
+import { BackButton } from "../ui/BackButton";
 import {
   ClockIcon,
   ListIcon,
@@ -85,6 +86,11 @@ export function DashboardLayout() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:py-8">
+        <div className="mb-4">
+          <div className="md:hidden">
+            <BackButton />
+          </div>
+        </div>
         <Outlet />
       </main>
 

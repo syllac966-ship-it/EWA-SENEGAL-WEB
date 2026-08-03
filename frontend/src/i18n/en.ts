@@ -94,6 +94,7 @@ export const en: Dictionary = {
     statDailyRate: "Daily rate",
     statMonthlySalary: "Monthly salary",
     statFeePercent: "Advance fee",
+    statMonthlyWithdrawals: "Total withdrawn this month",
     ctaTitle: "Need cash before payday?",
     ctaSubtitle: "Request an advance of up to {{percent}}% of your salary already earned.",
     ctaButton: "Request an advance",
@@ -118,6 +119,8 @@ export const en: Dictionary = {
       "I understand I will receive {{amount}} now, and {{total}} will be deducted from my salary at month-end (requested amount + {{percent}}% service fee).",
     submit: "Confirm request",
     submitting: "Sending request...",
+    passwordConfirmLabel: "Your password to confirm",
+    confirmWithPassword: "Confirm with password",
     error: "Advance request failed.",
   },
   advanceHistory: {

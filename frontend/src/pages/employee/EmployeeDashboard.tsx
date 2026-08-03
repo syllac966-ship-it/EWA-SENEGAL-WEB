@@ -13,6 +13,7 @@ export function EmployeeDashboard() {
   const { t } = useTranslation();
   const [summary, setSummary] = useState<EarnedSalarySummary | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [monthlyWithdrawn, setMonthlyWithdrawn] = useState<number | null>(null);
 
   const isPendingOrInactive = user?.employeeStatus === "pending" || user?.employeeStatus === "inactive";
 
@@ -22,6 +23,11 @@ export function EmployeeDashboard() {
       .get<EarnedSalarySummary>("/payroll/me/earned")
       .then((res) => setSummary(res.data))
       .catch((err) => setError(getApiErrorMessage(err)));
+    // total withdrawn this month
+    api
+      .get<{ total: number }>("/advances/me/total-month")
+      .then((res) => setMonthlyWithdrawn(res.data.total))
+      .catch(() => setMonthlyWithdrawn(0));
   }, [isPendingOrInactive]);
 
   if (isPendingOrInactive) {
@@ -99,6 +105,13 @@ export function EmployeeDashboard() {
         <StatPill label={t("dashboard.statMonthlySalary")} value={formatFcfa(summary.monthlySalary)} />
         <StatPill label={t("dashboard.statFeePercent")} value={`${summary.serviceFeePercent}%`} />
       </div>
+
+      {monthlyWithdrawn !== null && (
+        <Card className="mx-auto max-w-lg text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("dashboard.statMonthlyWithdrawals")}</p>
+          <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{formatFcfa(monthlyWithdrawn)}</p>
+        </Card>
+      )}
 
       <Card className="flex flex-col items-start justify-between gap-4 rounded-3xl sm:flex-row sm:items-center">
         <div>

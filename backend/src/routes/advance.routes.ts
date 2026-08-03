@@ -11,6 +11,7 @@ router.use(requireAuth);
 // Salarié
 router.post("/", validate(createAdvanceRequestSchema), advanceController.create);
 router.get("/me", advanceController.listMine);
+router.get("/me/total-month", advanceController.totalThisMonth);
 
 // Admin RH
 router.get("/", requireRole("admin"), advanceController.listAll);

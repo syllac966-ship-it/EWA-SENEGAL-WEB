@@ -225,3 +225,16 @@ export async function getCurrentUser(userId: string): Promise<CurrentUserProfile
     companyName: row.company_name,
   };
 }
+
+export async function verifyPasswordForUser(userId: string, password: string): Promise<void> {
+  const result = await query<AppUser>(`SELECT * FROM users WHERE id = $1`, [userId]);
+  const user = result.rows[0];
+  if (!user) {
+    throw new UnauthorizedError();
+  }
+
+  const isValid = await verifyPassword(password, user.password_hash);
+  if (!isValid) {
+    throw new AppError("Mot de passe incorrect.", 401);
+  }
+}

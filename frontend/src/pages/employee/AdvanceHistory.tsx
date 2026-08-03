@@ -3,6 +3,7 @@ import { useTranslation } from "../../i18n/LanguageContext";
 import { api, getApiErrorMessage } from "../../lib/api";
 import { formatDate, formatFcfa } from "../../lib/format";
 import { Card } from "../../components/ui/Card";
+import { BackButton } from "../../components/ui/BackButton";
 import { StatusBadge } from "../../components/ui/StatusBadge";
 import type { AdvanceRequest } from "../../types";
 
@@ -20,6 +21,9 @@ export function AdvanceHistory() {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-start">
+        <BackButton />
+      </div>
       <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("advanceHistory.title")}</h1>
 
       {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}

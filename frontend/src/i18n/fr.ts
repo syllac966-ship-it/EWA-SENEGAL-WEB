@@ -92,6 +92,7 @@ export const fr = {
     statDailyRate: "Taux journalier",
     statMonthlySalary: "Salaire mensuel",
     statFeePercent: "Frais avance",
+    statMonthlyWithdrawals: "Total retiré ce mois",
     ctaTitle: "Besoin d'argent avant la paie ?",
     ctaSubtitle: "Demandez une avance jusqu'à {{percent}}% de votre salaire déjà gagné.",
     ctaButton: "Demander une avance",
@@ -116,6 +117,8 @@ export const fr = {
       "Je comprends que je recevrai {{amount}} maintenant et que {{total}} seront déduits de mon salaire en fin de mois (montant demandé + {{percent}}% de frais de service).",
     submit: "Confirmer la demande",
     submitting: "Envoi de la demande...",
+    passwordConfirmLabel: "Votre mot de passe pour confirmer",
+    confirmWithPassword: "Confirmer avec le mot de passe",
     error: "Échec de la demande d'avance.",
   },
   advanceHistory: {

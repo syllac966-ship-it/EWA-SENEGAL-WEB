@@ -35,6 +35,10 @@ export const deleteAccountSchema = z.object({
   password: z.string().min(1, "Mot de passe requis pour confirmer la suppression"),
 });
 
+export const verifyPasswordSchema = z.object({
+  password: z.string().min(1, "Mot de passe requis"),
+});
+
 export const updateProfileSchema = z.object({
   phone: z.string().trim().regex(phoneRegex, "Numéro de téléphone invalide"),
 });

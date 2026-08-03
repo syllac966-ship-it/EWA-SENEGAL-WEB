@@ -7,6 +7,7 @@ import { Card } from "../../components/ui/Card";
 import { Field } from "../../components/ui/Field";
 import { Button } from "../../components/ui/Button";
 import type { EarnedSalarySummary, PaymentMethod } from "../../types";
+import { BackButton } from "../../components/ui/BackButton";
 
 export function AdvanceRequestPage() {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ export function AdvanceRequestPage() {
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -45,6 +49,17 @@ export function AdvanceRequestPage() {
     setError(null);
     setSubmitting(true);
     try {
+      // If password prompt not shown yet, trigger it as a double-confirmation
+      if (!showPasswordPrompt) {
+        setShowPasswordPrompt(true);
+        setSubmitting(false);
+        return;
+      }
+
+      // Verify password first
+      setPasswordError(null);
+      await api.post("/auth/verify-password", { password });
+
       await api.post("/advances", {
         requestedAmount,
         paymentMethod: method,
@@ -52,7 +67,13 @@ export function AdvanceRequestPage() {
       });
       navigate("/dashboard/history");
     } catch (err) {
-      setError(getApiErrorMessage(err, t("advanceRequest.error")));
+      // distinguish password error
+      const msg = getApiErrorMessage(err, t("advanceRequest.error"));
+      if ((err as any)?.response?.status === 401) {
+        setPasswordError(msg);
+      } else {
+        setError(msg);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -60,6 +81,9 @@ export function AdvanceRequestPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
+      <div className="flex items-center justify-start">
+        <BackButton />
+      </div>
       <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("advanceRequest.title")}</h1>
 
       {summary && (
@@ -169,6 +193,20 @@ export function AdvanceRequestPage() {
 
           {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
+          {showPasswordPrompt && (
+            <div className="space-y-2">
+              <Field
+                id="confirm-password"
+                label={t("advanceRequest.passwordConfirmLabel")}
+                type="password"
+                required
+                value={password}
+                onChange={setPassword}
+              />
+              {passwordError && <p className="text-sm text-red-600 dark:text-red-400">{passwordError}</p>}
+            </div>
+          )}
+
           <Button
             type="submit"
             fullWidth
@@ -176,8 +214,14 @@ export function AdvanceRequestPage() {
               submitting || !summary || summary.availableForAdvance <= 0 || requestedAmount <= 0 || !confirmed
             }
           >
-            {submitting ? t("advanceRequest.submitting") : t("advanceRequest.submit")}
+            {submitting ? t("advanceRequest.submitting") : showPasswordPrompt ? t("advanceRequest.confirmWithPassword") : t("advanceRequest.submit")}
           </Button>
+
+          {showPasswordPrompt && (
+            <Button type="button" variant="secondary" className="mt-2" onClick={() => setShowPasswordPrompt(false)}>
+              {t("common.cancel")}
+            </Button>
+          )}
         </form>
       </Card>
     </div>

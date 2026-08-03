@@ -72,3 +72,12 @@ export const deleteAccount = asyncHandler(async (req: Request, res: Response) =>
   await authService.deleteAccount(req.user.sub, password);
   res.json({ message: "Compte supprimé." });
 });
+
+export const verifyPassword = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new UnauthorizedError();
+  }
+  const { password } = req.body as { password: string };
+  await authService.verifyPasswordForUser(req.user.sub, password);
+  res.status(204).end();
+});
