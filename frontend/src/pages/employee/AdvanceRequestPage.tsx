@@ -7,7 +7,6 @@ import { Card } from "../../components/ui/Card";
 import { Field } from "../../components/ui/Field";
 import { Button } from "../../components/ui/Button";
 import type { EarnedSalarySummary, PaymentMethod } from "../../types";
-import { BackButton } from "../../components/ui/BackButton";
 
 export function AdvanceRequestPage() {
   const navigate = useNavigate();
@@ -81,9 +80,6 @@ export function AdvanceRequestPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <div className="flex items-center justify-start">
-        <BackButton />
-      </div>
       <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{t("advanceRequest.title")}</h1>
 
       {summary && (

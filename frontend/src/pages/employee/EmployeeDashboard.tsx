@@ -104,14 +104,12 @@ export function EmployeeDashboard() {
         <StatPill label={t("dashboard.statDailyRate")} value={formatFcfa(summary.dailyRate)} />
         <StatPill label={t("dashboard.statMonthlySalary")} value={formatFcfa(summary.monthlySalary)} />
         <StatPill label={t("dashboard.statFeePercent")} value={`${summary.serviceFeePercent}%`} />
+        <StatPill
+          label={t("dashboard.statMonthlyWithdrawals")}
+          value={monthlyWithdrawn !== null ? formatFcfa(monthlyWithdrawn) : formatFcfa(0)}
+        />
       </div>
-
-      {monthlyWithdrawn !== null && (
-        <Card className="mx-auto max-w-lg text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t("dashboard.statMonthlyWithdrawals")}</p>
-          <p className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">{formatFcfa(monthlyWithdrawn)}</p>
-        </Card>
-      )}
+      
 
       <Card className="flex flex-col items-start justify-between gap-4 rounded-3xl sm:flex-row sm:items-center">
         <div>
