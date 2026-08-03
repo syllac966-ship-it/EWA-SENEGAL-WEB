@@ -52,7 +52,8 @@ export function EmployeeDashboard() {
   });
 
   function formatMonthYear(isoDate: string) {
-    return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(new Date(isoDate));
+    const value = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(new Date(isoDate));
+    return value.charAt(0).toUpperCase() + value.slice(1);
   }
 
   return (
